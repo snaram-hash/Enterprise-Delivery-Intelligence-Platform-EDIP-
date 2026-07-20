@@ -101,16 +101,28 @@ Every state change (Draft ➔ Pending ➔ Approved) is cryptographically stamped
 
 ---
 
+## 📈 Business Impact (Before vs. After)
+
+| Problem Area | Before EDIP | After EDIP |
+| :--- | :--- | :--- |
+| **Approvals** | Status scattered across email threads | Centralized, 1-click digital signature workflow |
+| **Visibility** | Manual release reporting via Excel | Automated executive dashboard updated in real-time |
+| **Traceability** | Difficult to map code to business rules | End-to-end, bi-directional requirement lineage |
+| **Delivery Delays** | Discovered late (usually during release) | Early bottleneck detection and SLA tracking |
+| **Governance** | Reactive (fixing broken releases) | Proactive delivery insights and volatility metrics |
+
+---
+
 ## 🚀 Quick Start (Running the Platform)
 
 ### 1. Initialize the Enterprise Database
-This script generates the 3NF SQLite database, enforces Foreign Key constraints, and populates the system with mock users (Sponsors, BAs, Engineers) and mock requirements.
+This script generates the 3NF SQLite database, enforces Foreign Key constraints, and populates the system with 500+ historical requirements containing simulated delays and volatility.
 ```bash
 python infrastructure/database.py
 ```
 
 ### 2. Launch the Executive Portal
-This spins up the Streamlit application.
+This spins up the Streamlit Business Intelligence application.
 ```bash
 python -m streamlit run presentation/app.py
 ```
@@ -118,7 +130,7 @@ python -m streamlit run presentation/app.py
 ---
 
 ## 📚 Engineering & Business Documentation
-Comprehensive artifacts detailing the 10-phase delivery methodology are located in the `/docs` directory:
+Comprehensive artifacts detailing the delivery methodology are located in the `/docs` directory:
 - [Business Discovery Report](docs/Business_Discovery_Report.md): The "As-Is" McKinsey-style analysis.
 - [Requirements Engineering (BRD/FRD)](docs/Requirements_Engineering.md): The formal Business & Functional specifications.
 - [Enterprise Architecture & ADRs](docs/Enterprise_Architecture.md): Architectural Decision Records.
@@ -126,5 +138,5 @@ Comprehensive artifacts detailing the 10-phase delivery methodology are located 
 
 ---
 <div align="center">
-  <i>Engineered for Enterprise Requirements Management</i>
+  <i>Engineered for Enterprise Delivery Intelligence</i>
 </div>
