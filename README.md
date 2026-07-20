@@ -60,15 +60,15 @@ EDIP ingests massive amounts of historical delivery data across thousands of req
 
 ### The CIO Killer Dashboard
 *Quickly identify release health, projects at risk, and predicted delays.*
-> **[Insert Screenshot 1 Here: Executive Release Health showing the 74/100 score and the ₹8.4 Cr value at risk]**
+> **[]**
 
 ### Delivery Bottleneck Analysis
 *Identify which sponsors and departments are causing SLA breaches.*
-> **[Insert Screenshot 2 Here: SLA Breach & Approval Delay Analysis highlighting the worst offending sponsor]**
+> **[]**
 
 ### UAT Defect Heatmap
 *Track First-Pass Yield and engineering rework cycles.*
-> **[Insert Screenshot 3 Here: Top 20 Requirements with Highest Rework]**
+> **[]**
 
 ---
 
@@ -156,3 +156,4 @@ Comprehensive artifacts detailing the delivery methodology are located in the `/
 <div align="center">
   <i>Engineered for Enterprise Delivery Intelligence</i>
 </div>
+
