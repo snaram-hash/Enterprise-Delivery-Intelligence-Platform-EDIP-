@@ -82,7 +82,7 @@ flowchart TD
         UI[Streamlit Executive BI Dashboard]
     end
 
-    subgraph Core Analytics Engine (Application Layer)
+    subgraph Core Analytics Engine
         VolEng[Volatility Analysis Engine]
         SLAEng[SLA Breach Engine]
         TraceEngine[Traceability & Compliance Engine]
