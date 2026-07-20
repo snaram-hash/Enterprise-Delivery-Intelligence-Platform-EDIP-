@@ -7,118 +7,82 @@ import os
 # Add Application Layer to path
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'application'))
 from traceability_service import TraceabilityService
-from approval_service import ApprovalService
+from analytics_service import DeliveryAnalyticsService
 
 # --- CONFIGURATION ---
-st.set_page_config(page_title="ERDMP | Executive Portal", layout="wide", page_icon="📝")
-db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "erdmp_enterprise.db")
+st.set_page_config(page_title="EDIP | Delivery Analytics", layout="wide", page_icon="📈")
+db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "edip_enterprise.db")
 
 # Initialize Services
 trace_svc = TraceabilityService(db_path)
-appr_svc = ApprovalService(db_path)
+analytics_svc = DeliveryAnalyticsService(db_path)
 
-# --- MOCK AUTHENTICATION ---
-# In a real enterprise app, this would be SAML/SSO
-st.sidebar.title("🔐 Simulated SSO")
-user_role = st.sidebar.selectbox("Log in as:", [
-    "U002 (David Chen - Business Sponsor)", 
-    "U001 (Sarah Jenkins - Lead BA)",
-    "U003 (Marcus Johnson - Lead Engineer)",
-    "U004 (Elena Rodriguez - QA/Compliance)"
-])
-active_user_id = user_role.split(' ')[0]
-
-st.sidebar.markdown("---")
-st.sidebar.info("Enterprise Requirements & Decision Management Platform v1.0")
+# --- HEADER ---
+st.title("Enterprise Delivery Intelligence Platform")
+st.markdown("Analyzing software delivery velocity, rework, and approval bottlenecks across the enterprise.")
+st.divider()
 
 # --- NAVIGATION ---
-tab1, tab2, tab3 = st.tabs(["📊 Executive Dashboard", "✅ My Approvals Queue", "🔗 Traceability & Compliance Audit"])
+tab1, tab2, tab3 = st.tabs(["📊 Executive Portfolio Health", "⏳ Approval Bottlenecks", "🔗 Traceability & UAT Quality"])
 
 # -----------------------------------------
-# TAB 1: EXECUTIVE DASHBOARD
+# TAB 1: EXECUTIVE PORTFOLIO HEALTH
 # -----------------------------------------
 with tab1:
-    st.header("Enterprise Requirement Health")
+    st.header("Requirement Volatility & Value Delivery")
     
-    conn = sqlite3.connect(db_path)
+    col1, col2 = st.columns(2)
     
-    # KPI Metrics
-    c1, c2, c3 = st.columns(3)
-    total_reqs = pd.read_sql_query("SELECT COUNT(*) as c FROM requirements WHERE is_active=1", conn).iloc[0]['c']
-    pending_reqs = pd.read_sql_query("SELECT COUNT(*) as c FROM requirements WHERE status='PendingReview' AND is_active=1", conn).iloc[0]['c']
-    missing_tests = trace_svc.get_missing_test_coverage()
-    
-    c1.metric("Total Active Requirements", total_reqs)
-    c2.metric("Pending Approvals Bottleneck", pending_reqs, delta=f"{pending_reqs} delaying sprint", delta_color="inverse")
-    
-    if len(missing_tests) > 0:
-        c3.metric("Missing Test Coverage", len(missing_tests), delta="Compliance Risk", delta_color="inverse")
-    else:
-        c3.metric("Missing Test Coverage", 0, delta="100% Traced", delta_color="normal")
+    with col1:
+        st.subheader("Department Volatility Index")
+        st.markdown("High average versions indicate requirements are changing post-approval (Ghost Edits/Scope Creep).")
+        vol_df = analytics_svc.get_volatility_metrics()
         
-    st.divider()
-    st.subheader("Recent Audit Ledger (System of Record)")
-    audit_df = pd.read_sql_query('''
-        SELECT a.timestamp, u.name as actor, a.action_type, r.title, a.old_status, a.new_status 
-        FROM audit_logs a
-        JOIN users u ON a.user_id = u.user_id
-        JOIN requirements r ON a.req_id = r.req_id
-        ORDER BY a.timestamp DESC LIMIT 10
-    ''', conn)
-    st.dataframe(audit_df, use_container_width=True)
-    
-    conn.close()
+        # Use Streamlit's native bar chart for quick visualization
+        st.bar_chart(data=vol_df, x='department', y='avg_version_volatility', color="#FF5630")
+        
+    with col2:
+        st.subheader("Business Value by Department")
+        st.markdown("Total estimated business value of active requirements.")
+        st.bar_chart(data=vol_df, x='department', y='total_business_value', color="#0052CC")
+        
+    st.dataframe(vol_df, use_container_width=True)
 
 # -----------------------------------------
-# TAB 2: MY APPROVALS QUEUE
+# TAB 2: APPROVAL BOTTLENECKS
 # -----------------------------------------
 with tab2:
-    st.header(f"Action Required Queue")
+    st.header("SLA Breach & Approval Delay Analysis")
+    st.markdown("Identifies which Sponsors are delaying the delivery pipeline by sitting on 'PendingReview' requests.")
     
-    pending = appr_svc.get_pending_approvals_for_user(active_user_id)
+    bottleneck_df = analytics_svc.get_approval_bottlenecks()
     
-    if not pending:
-        st.success("Your approval queue is clear. No blockers assigned to you.")
-    else:
-        for req in pending:
-            with st.expander(f"🔴 PENDING SIGNATURE: {req['req_id']} - {req['title']} (v{req['version']})", expanded=True):
-                # Pull full details
-                conn = sqlite3.connect(db_path)
-                desc = pd.read_sql_query(f"SELECT description FROM requirements WHERE req_id='{req['req_id']}' AND is_active=1", conn).iloc[0]['description']
-                stories = pd.read_sql_query(f"SELECT story_id, i_want_to, acceptance_criteria FROM user_stories WHERE req_id='{req['req_id']}'", conn)
-                conn.close()
-                
-                st.markdown(f"**Business Justification:** {desc}")
-                
-                st.markdown("**Linked Engineering Specs (User Stories):**")
-                st.table(stories)
-                
-                comments = st.text_input("Approval / Rejection Comments", key=f"comment_{req['approval_id']}")
-                
-                col1, col2 = st.columns(2)
-                if col1.button("✅ Approve & Digitally Sign", key=f"app_{req['approval_id']}", type="primary"):
-                    appr_svc.sign_approval(req['approval_id'], active_user_id, "Approve", comments)
-                    st.success("Signed!")
-                    st.rerun()
-                if col2.button("❌ Reject back to Draft", key=f"rej_{req['approval_id']}"):
-                    appr_svc.sign_approval(req['approval_id'], active_user_id, "Reject", comments)
-                    st.error("Rejected.")
-                    st.rerun()
+    # Highlight the biggest offender
+    if not bottleneck_df.empty:
+        worst_offender = bottleneck_df.iloc[0]
+        st.error(f"🚨 **Critical Bottleneck Detected:** {worst_offender['sponsor_name']} ({worst_offender['department']}) averages **{worst_offender['avg_approval_days']:.1f} days** to approve requirements.")
+        
+    st.dataframe(bottleneck_df.style.highlight_max(subset=['avg_approval_days'], color='#ffcccc'), use_container_width=True)
 
 # -----------------------------------------
-# TAB 3: TRACEABILITY & COMPLIANCE AUDIT
+# TAB 3: TRACEABILITY & UAT QUALITY
 # -----------------------------------------
 with tab3:
-    st.header("Requirement Traceability Matrix (RTM)")
-    st.markdown("Bi-directional linkage proving that every engineered feature maps to an approved Business Rule.")
+    st.header("UAT First-Pass Yield & Defect Heatmap")
+    st.markdown("Analyzes engineering quality by tracking how many test cycles (rework) a requirement undergoes.")
     
-    df_matrix = trace_svc.get_full_traceability_matrix()
-    st.dataframe(df_matrix, use_container_width=True)
+    uat_df = analytics_svc.get_uat_quality_metrics()
+    
+    if not uat_df.empty:
+        st.warning("Top 20 Requirements with Highest Rework (Test Cycles > 1)")
+        st.dataframe(uat_df.style.background_gradient(subset=['max_rework_cycles'], cmap='Reds'), use_container_width=True)
     
     st.divider()
-    st.subheader("Compliance Exception Report")
+    
+    st.subheader("Orphaned User Stories (Compliance Risk)")
+    missing_tests = trace_svc.get_missing_test_coverage()
     if len(missing_tests) > 0:
-        st.warning("⚠️ The following User Stories are orphaned (no linked Test Cases). They cannot pass UAT compliance.")
+        st.error(f"⚠️ Found {len(missing_tests)} User Stories with NO linked test cases. These will fail compliance audit.")
         st.dataframe(missing_tests, use_container_width=True)
     else:
-        st.success("All User Stories have full Test Case coverage.")
+        st.success("100% Test Case Coverage Achieved.")

@@ -1,7 +1,7 @@
 <div align="center">
 
-# Enterprise Requirements & Decision Management Platform (ERDMP)
-### *Centralizing the Complete Business Analysis Lifecycle*
+# Enterprise Delivery Intelligence Platform (EDIP)
+### *System of Insight for Enterprise Software Delivery*
 
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg?style=for-the-badge&logo=python&logoColor=white)](#)
 [![SQLite](https://img.shields.io/badge/Database-3NF_Compliance-lightgrey.svg?style=for-the-badge&logo=sqlite&logoColor=white)](#)
@@ -13,46 +13,43 @@
 ---
 
 ## 🎯 Executive Summary
-The **Enterprise Requirements & Decision Management Platform (ERDMP)** is an internal capability product designed to solve a massive structural inefficiency within Fortune 500 companies: the fragmented management of Business Requirements.
+The **Enterprise Delivery Intelligence Platform (EDIP)** is an advanced internal Business Analytics tool designed to answer the hardest questions in Fortune 500 software engineering: *Why are our projects delayed? Where are our approval bottlenecks? Why is our UAT failure rate so high?*
 
-When a multinational enterprise processes 300+ major change requests per quarter using scattered Word documents, Excel sheets, and email threads, the result is extreme approval gridlock, duplicated requirements, and failed compliance audits. 
+Rather than being a simple "System of Record" (like Jira or Word), EDIP is a "System of Insight". It ingests massive amounts of historical delivery data across thousands of requirements, analyzing state transitions, version volatility, and approval SLAs to mathematically quantify delivery health.
 
-**ERDMP replaces this chaos by providing:**
-1. A single source of truth for authoring Business Requirements.
-2. A strict State-Machine Engine enforcing digital signature approvals.
-3. A bi-directional Requirement Traceability Matrix (RTM) linking Business Rules to User Stories to Test Cases.
-4. An immutable Audit Ledger tracking every state change for regulatory compliance.
-
-*(Note: This platform sits strictly upstream of Sprint Execution. It feeds approved requirements into execution tools like Jira, it does not replace them).*
+**EDIP delivers insights via:**
+1. **Requirement Volatility Indexing:** Flagging teams that constantly change requirements post-approval (Scope Creep).
+2. **Approval Bottleneck Analysis:** Tracking exactly which Business Sponsors are slowing down the delivery pipeline.
+3. **UAT First-Pass Yield:** Measuring engineering quality by tracking how many test cycles (rework) a requirement undergoes.
+4. **Compliance Traceability:** An immutable Audit Ledger mapping Business Rules -> User Stories -> Test Cases.
 
 ---
 
 ## 🏛️ Enterprise Architecture
 
-The platform is designed using **Clean Architecture** principles. The core domain logic (state transitions and traceability mapping) is entirely decoupled from the presentation layer and the database, allowing for isolated testing of business rules.
+The platform is designed using **Clean Architecture** principles. The Analytics Engine is entirely decoupled from the presentation layer and the database, allowing for isolated testing of business rules.
 
 ```mermaid
 flowchart TD
     subgraph Presentation Layer
-        UI[Streamlit Web App]
+        UI[Streamlit Executive BI Dashboard]
     end
 
-    subgraph Core Application Layer (Use Cases)
-        ReqManager[Requirement Manager]
-        AppFlow[Approval Workflow Engine]
-        TraceEngine[Traceability Engine]
+    subgraph Core Analytics Engine (Application Layer)
+        VolEng[Volatility Analysis Engine]
+        SLAEng[SLA Breach Engine]
+        TraceEngine[Traceability & Compliance Engine]
     end
 
     subgraph Infrastructure Layer
         SQLite[(Enterprise SQLite DB 3NF)]
-        AuditLog[Audit Logging Service]
     end
 
-    UI --> ReqManager
-    UI --> AppFlow
+    UI --> VolEng
+    UI --> SLAEng
     UI --> TraceEngine
-    ReqManager --> SQLite
-    AppFlow --> AuditLog
+    VolEng --> SQLite
+    SLAEng --> SQLite
 ```
 
 ### The "Soft Delete" Versioning Strategy
