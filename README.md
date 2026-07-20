@@ -12,10 +12,41 @@
 
 ---
 
-## 🎯 Executive Summary
-The **Enterprise Delivery Intelligence Platform (EDIP)** is an advanced internal Business Analytics tool designed to answer the hardest questions in Fortune 500 software engineering: *Why are our projects delayed? Where are our approval bottlenecks? Why is our UAT failure rate so high?*
+## Monday Morning at 9:00 AM
+The CIO walks into the Weekly Delivery Review.
 
-Rather than being a simple "System of Record" (like Jira or Word), EDIP is a "System of Insight". It ingests massive amounts of historical delivery data across thousands of requirements, analyzing state transitions, version volatility, and approval SLAs to mathematically quantify delivery health.
+She asks:
+> *"Why did Release 24.3 slip by two weeks?"*
+
+Nobody has an answer.
+The Business Analyst checks Jira. The Project Manager opens Excel. Engineering exports another CSV. QA has a separate tracker. Requirements are scattered in Word documents, and approvals are buried in email threads.
+
+Three hours later, Leadership still doesn't know:
+* Which requirement caused the delay.
+* Who approved the late change.
+* Why UAT failed three times.
+* How much business value was lost.
+
+**EDIP exists to answer those questions in minutes, not hours.**
+
+---
+
+## 🎯 What a Business Analyst Actually Does
+A high-level Business Analyst doesn't just "gather requirements"—they govern the entire delivery lifecycle. This platform mathematically models those exact responsibilities:
+
+| BA Responsibility | EDIP Module |
+| :--- | :--- |
+| **Gather requirements** | Requirements Workspace |
+| **Trace changes & scope creep** | Version Intelligence / Volatility Engine |
+| **UAT coordination** | Test Analytics & First-Pass Yield |
+| **Stakeholder approvals** | Approval Engine & SLA Tracker |
+| **Executive reporting** | Delivery Intelligence Dashboard |
+| **Process improvement** | Bottleneck Analytics |
+
+---
+
+## 📊 Core Analytical Capabilities
+EDIP ingests massive amounts of historical delivery data across thousands of requirements, analyzing state transitions, version volatility, and approval SLAs to mathematically quantify delivery health.
 
 **EDIP delivers insights via:**
 1. **Requirement Volatility Indexing:** Flagging teams that constantly change requirements post-approval (Scope Creep).

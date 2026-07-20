@@ -93,3 +93,51 @@ class DeliveryAnalyticsService:
         df = pd.read_sql_query(query, conn)
         conn.close()
         return df
+
+    def get_killer_metrics(self):
+        """
+        Calculates the macro 'Killer Dashboard' metrics for the CIO view.
+        """
+        conn = self.get_connection()
+        
+        # 1. Average Approval Delay (across all)
+        query_delay = '''
+            WITH submissions AS (SELECT req_id, timestamp as submitted_at FROM audit_logs WHERE new_status = 'PendingReview'),
+                 approvals AS (SELECT req_id, timestamp as approved_at FROM audit_logs WHERE new_status = 'Approved' AND action_type = 'Stakeholder Signoff')
+            SELECT AVG(JULIANDAY(a.approved_at) - JULIANDAY(s.submitted_at)) as avg_delay
+            FROM approvals a JOIN submissions s ON a.req_id = s.req_id
+        '''
+        avg_delay = pd.read_sql_query(query_delay, conn).iloc[0]['avg_delay']
+        if pd.isna(avg_delay): avg_delay = 0
+        
+        # 2. Requirements Changed After Approval (Volatility)
+        query_volatility = "SELECT COUNT(*) as c FROM requirements WHERE version > 1.0 AND is_active = 1"
+        changed_reqs = pd.read_sql_query(query_volatility, conn).iloc[0]['c']
+        
+        # 3. Projects at Risk & Business Value at Risk
+        # Risk defined as: version > 1.2 OR in PendingReview for > 7 days
+        query_risk = '''
+            SELECT COUNT(*) as risk_count, SUM(business_value_est) as risk_value
+            FROM requirements r
+            WHERE is_active = 1 AND (version > 1.2 OR status = 'PendingReview')
+        '''
+        risk_data = pd.read_sql_query(query_risk, conn).iloc[0]
+        projects_at_risk = risk_data['risk_count'] or 0
+        value_at_risk = risk_data['risk_value'] or 0
+        
+        # 4. Release Health Score (Heuristic: 100 - (projects at risk * 2) - (avg delay))
+        health_score = max(0, min(100, 100 - (projects_at_risk * 1.5) - (avg_delay * 2)))
+        
+        # 5. Predicted Release Delay (Heuristic based on approval delay and rework)
+        predicted_delay = avg_delay * 1.4 # Rough multiplier for UAT delays
+        
+        conn.close()
+        
+        return {
+            'health_score': int(health_score),
+            'projects_at_risk': int(projects_at_risk),
+            'avg_approval_delay': round(avg_delay, 1),
+            'requirements_changed': int(changed_reqs),
+            'predicted_delay': round(predicted_delay, 1),
+            'value_at_risk': int(value_at_risk)
+        }
