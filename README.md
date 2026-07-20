@@ -1,7 +1,7 @@
 <div align="center">
 
 # Enterprise Delivery Intelligence Platform (EDIP)
-### *System of Insight for Enterprise Software Delivery*
+### *Turning software delivery data into executive decisions.*
 
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg?style=for-the-badge&logo=python&logoColor=white)](#)
 [![SQLite](https://img.shields.io/badge/Database-3NF_Compliance-lightgrey.svg?style=for-the-badge&logo=sqlite&logoColor=white)](#)
@@ -53,6 +53,22 @@ EDIP ingests massive amounts of historical delivery data across thousands of req
 2. **Approval Bottleneck Analysis:** Tracking exactly which Business Sponsors are slowing down the delivery pipeline.
 3. **UAT First-Pass Yield:** Measuring engineering quality by tracking how many test cycles (rework) a requirement undergoes.
 4. **Compliance Traceability:** An immutable Audit Ledger mapping Business Rules -> User Stories -> Test Cases.
+
+---
+
+## 📸 Executive Dashboards (Demo)
+
+### The CIO Killer Dashboard
+*Quickly identify release health, projects at risk, and predicted delays.*
+> **[Insert Screenshot 1 Here: Executive Release Health showing the 74/100 score and the ₹8.4 Cr value at risk]**
+
+### Delivery Bottleneck Analysis
+*Identify which sponsors and departments are causing SLA breaches.*
+> **[Insert Screenshot 2 Here: SLA Breach & Approval Delay Analysis highlighting the worst offending sponsor]**
+
+### UAT Defect Heatmap
+*Track First-Pass Yield and engineering rework cycles.*
+> **[Insert Screenshot 3 Here: Top 20 Requirements with Highest Rework]**
 
 ---
 

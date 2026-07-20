@@ -120,7 +120,7 @@ class DatabaseManager:
         print("Seeding Enterprise Delivery Intelligence Platform with 500+ historical records...")
         
         # Seed Users (BAs, Sponsors, QA, Eng) across different departments
-        depts = ['Retail Banking', 'Wealth Management', 'Risk & Compliance', 'Digital Channels']
+        depts = ['Retail Banking', 'Wealth Management', 'Risk & Compliance', 'Digital Channels', 'Payments Core']
         sponsors = [(f'S{i:03d}', f'Sponsor {i}', 'Sponsor', random.choice(depts)) for i in range(1, 11)]
         bas = [(f'B{i:03d}', f'Analyst {i}', 'BA', random.choice(depts)) for i in range(1, 16)]
         qas = [(f'Q{i:03d}', f'QA {i}', 'QA', random.choice(depts)) for i in range(1, 11)]
@@ -129,7 +129,15 @@ class DatabaseManager:
         all_users = sponsors + bas + qas + engs
         cursor.executemany('INSERT INTO users VALUES (?,?,?,?)', all_users)
         
-        # Generate 500 Historical Requirements over the last 12 months
+        # Realistic Enterprise Project Names
+        project_names = [
+            'Payments Modernization API', 'Customer Identity Service (CIAM)', 
+            'Mobile Banking App Redesign', 'Risk Engine Real-time Scoring',
+            'Fraud Detection ML Model Integration', 'Legacy Mainframe Decommissioning Phase 1',
+            'SWIFT ISO 20022 Compliance', 'Open Banking PSD2 APIs',
+            'Wealth Portfolio Rebalancing Engine', 'Card Issuance Automation'
+        ]
+        
         end_date = datetime.now()
         start_date = end_date - timedelta(days=365)
         
@@ -150,73 +158,74 @@ class DatabaseManager:
             sponsor_id = sponsor[0]
             dept = sponsor[3]
             
+            project_base = random.choice(project_names)
+            title = f"{project_base} - Epic {random.randint(1, 50)}"
+            
             # Simulate creation date
             days_offset = random.randint(0, 350)
             created_at = start_date + timedelta(days=days_offset)
             
-            # Analytics Generation Logic
-            # 1. Volatility: 20% chance of high volatility (versions 1.2 to 2.5)
-            # 2. Cycle Time Delays: 'Risk & Compliance' dept has artificially longer approval times
-            # 3. UAT Failures: 15% chance of multiple test cycles before passing
-            
             is_volatile = random.random() < 0.20
             version = 1.0 + (random.randint(1, 15)/10.0 if is_volatile else random.choice([0.0, 0.1, 0.2]))
             
-            # Status distribution
             status_rand = random.random()
-            if status_rand < 0.05:
-                status = 'Draft'
-            elif status_rand < 0.20:
-                status = 'PendingReview'
-            elif status_rand < 0.35:
-                status = 'InUAT'
-            else:
-                status = 'Deployed'
+            if status_rand < 0.05: status = 'Draft'
+            elif status_rand < 0.20: status = 'PendingReview'
+            elif status_rand < 0.35: status = 'InUAT'
+            else: status = 'Deployed'
                 
-            business_value = random.randint(10000, 500000)
+            business_value = random.randint(50000, 2000000)
             
-            reqs.append((req_id, version, f'Automate Process in {dept}', f'Description for {req_id}', status, ba, sponsor_id, business_value, created_at.strftime("%Y-%m-%d %H:%M:%S"), 1))
+            # THE NIGHTMARE SCENARIO (Hardcoded for the Demo)
+            if i == 500:
+                title = "🚨 Payments Modernization Gateway (Release 24.3)"
+                version = 3.5
+                status = 'InUAT'
+                dept = 'Payments Core'
+                sponsor_id = sponsors[0][0] # Force a specific sponsor
+                business_value = 8500000
+                is_volatile = True
+                
+            reqs.append((req_id, version, title, f'Implementation details for {title}', status, ba, sponsor_id, business_value, created_at.strftime("%Y-%m-%d %H:%M:%S"), 1))
             
-            # Generate 2-5 Stories per Requirement
             num_stories = random.randint(2, 5)
+            if i == 500: num_stories = 8 # Nightmare scenario has many stories
+            
             for s in range(num_stories):
                 story_id = f'US-{story_counter:05d}'
-                stories.append((story_id, req_id, 'User', 'do something', 'I get value', 'Criteria XYZ'))
+                stories.append((story_id, req_id, 'User', 'execute action', 'system responds', f'Acceptance Criteria for {story_id}'))
                 
-                # Generate 1-3 Test Cases per Story
                 num_tests = random.randint(1, 3)
                 for t in range(num_tests):
                     test_id = f'TC-{test_counter:05d}'
                     
-                    # 15% chance of high rework (Test Cycle > 1)
                     test_cycle = random.randint(2, 4) if random.random() < 0.15 else 1
-                    
                     tc_status = 'Pass' if status in ['Deployed', 'Approved'] else random.choice(['Pass', 'Fail', 'Pending'])
-                    if status == 'InUAT' and random.random() < 0.3:
-                        tc_status = 'Fail' # Active defects
+                    
+                    if status == 'InUAT' and random.random() < 0.3: tc_status = 'Fail'
+                    
+                    if i == 500: # Nightmare scenario fails UAT repeatedly
+                        test_cycle = 4
+                        tc_status = 'Fail'
                         
-                    test_cases.append((test_id, story_id, 'Verify something', tc_status, test_cycle))
+                    test_cases.append((test_id, story_id, 'Verify acceptance criteria', tc_status, test_cycle))
                     test_counter += 1
                 
                 story_counter += 1
                 
-            # Audit and Approvals Generation
             if status != 'Draft':
-                # Submission to Pending
                 submit_date = created_at + timedelta(days=random.randint(1, 5))
                 audits.append((req_id, ba, 'Draft', 'PendingReview', 'Submission', submit_date.strftime("%Y-%m-%d %H:%M:%S")))
                 
                 if status in ['InUAT', 'Deployed']:
-                    # Simulate approval bottlenecks
-                    delay_days = random.randint(10, 25) if dept == 'Risk & Compliance' else random.randint(1, 5)
+                    delay_days = random.randint(10, 25) if dept == 'Risk & Compliance' or i == 500 else random.randint(1, 5)
                     approve_date = submit_date + timedelta(days=delay_days)
                     
-                    approvals.append((f'APP-{app_counter}', req_id, sponsor_id, 'Approved', 'Looks good', approve_date.strftime("%Y-%m-%d %H:%M:%S")))
+                    approvals.append((f'APP-{app_counter}', req_id, sponsor_id, 'Approved', 'Approved with conditions', approve_date.strftime("%Y-%m-%d %H:%M:%S")))
                     app_counter += 1
                     
                     audits.append((req_id, sponsor_id, 'PendingReview', 'Approved', 'Stakeholder Signoff', approve_date.strftime("%Y-%m-%d %H:%M:%S")))
                     
-                    # UAT and Deploy
                     if status == 'Deployed':
                         deploy_date = approve_date + timedelta(days=random.randint(14, 30))
                         audits.append((req_id, ba, 'Approved', 'Deployed', 'Release', deploy_date.strftime("%Y-%m-%d %H:%M:%S")))
